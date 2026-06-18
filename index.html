@@ -1,0 +1,1960 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#070c28" />
+    <title>Missão DinoEspacial</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ═══════════════════════════════════════════════
+   RESET & VARS
+═══════════════════════════════════════════════ */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      :root {
+        --space-dark: #070c28;
+        --card: #111b4a;
+        --card2: #0e1640;
+        --input: #1a2660;
+        --nav-bg: #070c28;
+        --border: #1a2660;
+        --purple: #7c4dff;
+        --blue: #40c4ff;
+        --pink: #f06292;
+        --yellow: #ffd740;
+        --green: #69f0ae;
+        --orange: #ff8a65;
+        --gold: #ffd700;
+        --text: #fff;
+        --text2: rgba(255, 255, 255, 0.82);
+        --muted: rgba(255, 255, 255, 0.48);
+        --tab: 76px;
+      }
+      html,
+      body,
+      #app {
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: "Nunito", "Segoe UI", sans-serif;
+        background: var(--space-dark);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ═══════════════════════════════════════════════
+   STARFIELD
+═══════════════════════════════════════════════ */
+      #starfield {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+      }
+      .star {
+        position: absolute;
+        border-radius: 50%;
+        background: #fff;
+        animation: twinkle var(--d, 3s) ease-in-out infinite var(--dl, 0s);
+      }
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.12;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.9;
+          transform: scale(1.5);
+        }
+      }
+      .planet {
+        position: absolute;
+        animation: floatP var(--d, 8s) ease-in-out infinite var(--dl, 0s);
+        opacity: 0.28;
+      }
+      @keyframes floatP {
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-14px) rotate(6deg);
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════ */
+      #app {
+        position: relative;
+        z-index: 1;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+      #content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: calc(var(--tab) + 8px);
+        scroll-behavior: smooth;
+      }
+      #content::-webkit-scrollbar {
+        display: none;
+      }
+
+      /* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+      #header {
+        background: #070c28;
+        border-bottom: 2px solid var(--border);
+        padding: 12px 14px 10px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .h-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .app-title {
+        font-size: 17px;
+        font-weight: 900;
+        background: linear-gradient(
+          135deg,
+          var(--blue),
+          var(--purple),
+          var(--pink)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .app-sub {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .h-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+      }
+      #lock-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: 2px solid var(--border);
+        background: var(--card);
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      #lock-btn.open {
+        border-color: var(--green);
+        background: #0e3028;
+      }
+      .stars-badge {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--card);
+        border: 2px solid rgba(255, 215, 0, 0.33);
+        border-radius: 50px;
+        padding: 7px 11px;
+        animation: sBlink 2.5s ease-in-out infinite;
+      }
+      @keyframes sBlink {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 transparent;
+        }
+        50% {
+          box-shadow: 0 0 14px 3px rgba(255, 215, 0, 0.22);
+        }
+      }
+      .sb-icon {
+        font-size: 16px;
+      }
+      .sb-num {
+        font-size: 20px;
+        font-weight: 900;
+        color: var(--gold);
+      }
+      .sb-lbl {
+        font-size: 10px;
+        color: rgba(255, 215, 0, 0.85);
+        font-weight: 700;
+      }
+      #unlock-banner {
+        display: none;
+        margin-top: 8px;
+        background: #0e3028;
+        border: 1.5px solid #1a7040;
+        border-radius: 10px;
+        padding: 7px 12px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      #unlock-banner.show {
+        display: flex;
+      }
+      .ub-text {
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--green);
+      }
+      #lock-now {
+        background: #1a5030;
+        border: 1px solid #2a7040;
+        border-radius: 8px;
+        color: var(--green);
+        font-size: 11px;
+        font-weight: 800;
+        padding: 4px 10px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      /* ═══════════════════════════════════════════════
+   BOTTOM NAV
+═══════════════════════════════════════════════ */
+      #nav {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 480px;
+        height: var(--tab);
+        background: #070c28;
+        border-top: 2px solid var(--border);
+        display: flex;
+        align-items: stretch;
+        z-index: 20;
+      }
+      .nav-btn {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 8px 0 12px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        border-top: 3px solid transparent;
+        color: var(--muted);
+        font-family: inherit;
+        transition: all 0.2s;
+      }
+      .nav-btn:active {
+        transform: scale(0.9);
+      }
+      .nav-btn.active {
+        color: #fff;
+      }
+      .nav-btn[data-tab="inicio"].active {
+        border-top-color: var(--blue);
+      }
+      .nav-btn[data-tab="semana"].active {
+        border-top-color: var(--purple);
+      }
+      .nav-btn[data-tab="historico"].active {
+        border-top-color: var(--green);
+      }
+      .nav-btn[data-tab="estrelas"].active {
+        border-top-color: var(--gold);
+      }
+      .nav-icon {
+        font-size: 22px;
+        transition: transform 0.2s;
+      }
+      .nav-btn.active .nav-icon {
+        transform: scale(1.18);
+      }
+      .nav-lbl {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+
+      /* ═══════════════════════════════════════════════
+   TODAY HERO
+═══════════════════════════════════════════════ */
+      .today-hero {
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        padding: 18px 16px;
+        margin: 14px 14px 0;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .th-emoji {
+        font-size: 52px;
+        animation: dinoF 3s ease-in-out infinite;
+      }
+      @keyframes dinoF {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-3deg);
+        }
+        50% {
+          transform: translateY(-10px) rotate(3deg);
+        }
+      }
+      .th-lbl {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .th-day {
+        font-size: 20px;
+        font-weight: 900;
+      }
+      .th-sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+        font-weight: 600;
+      }
+
+      /* ═══════════════════════════════════════════════
+   PERIOD SECTION
+═══════════════════════════════════════════════ */
+      .period-section {
+        margin: 14px 14px 0;
+      }
+      .period-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--card);
+        border-radius: 14px;
+        padding: 10px 14px;
+        margin-bottom: 10px;
+        border: 1.5px solid var(--border);
+      }
+      .p-icon {
+        font-size: 22px;
+      }
+      .p-title {
+        font-size: 15px;
+        font-weight: 900;
+        flex: 1;
+      }
+      .p-prog {
+        font-size: 13px;
+        font-weight: 800;
+        color: var(--muted);
+      }
+      .period-bar {
+        height: 5px;
+        border-radius: 5px;
+        background: var(--border);
+        margin-bottom: 12px;
+        overflow: hidden;
+      }
+      .period-bar-fill {
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.5s ease;
+      }
+      .tasks-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      /* ═══════════════════════════════════════════════
+   TASK CARD
+═══════════════════════════════════════════════ */
+      .task-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #131e52;
+        border: 2px solid var(--border);
+        border-radius: 15px;
+        padding: 12px;
+      }
+      .task-card.done {
+        background: #0e2240;
+        border-color: #1a5c35;
+      }
+      .task-chk {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2.5px solid var(--accent, var(--purple));
+        background: #0e1640;
+        cursor: pointer;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 900;
+        color: #fff;
+        transition: all 0.2s;
+        -webkit-appearance: none;
+        appearance: none;
+        font-family: inherit;
+      }
+      .task-chk:active {
+        transform: scale(0.82);
+      }
+      .task-chk.checked {
+        background: #1a8f4a;
+        border-color: var(--green);
+        box-shadow: 0 0 10px rgba(105, 240, 174, 0.42);
+      }
+      .task-input {
+        flex: 1;
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+        border: none;
+        background: transparent;
+        font-family: "Nunito", sans-serif;
+        outline: none;
+        min-width: 0;
+      }
+      .task-input::placeholder {
+        color: var(--muted);
+        font-style: italic;
+      }
+      .task-input.done {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+      .task-del {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: none;
+        background: #2a1030;
+        color: var(--pink);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 900;
+        transition: background 0.2s;
+        flex-shrink: 0;
+        font-family: inherit;
+      }
+      .task-del:active {
+        background: #4a1040;
+        transform: scale(0.88);
+      }
+      .add-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        width: 100%;
+        padding: 11px;
+        border-radius: 13px;
+        border: 2.5px dashed var(--border);
+        background: var(--card2);
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .add-btn:active {
+        border-color: var(--purple);
+        color: #fff;
+      }
+      .section-div {
+        height: 1px;
+        background: var(--border);
+        margin: 6px 14px 14px;
+      }
+
+      /* ═══════════════════════════════════════════════
+   DAY CARD (Semana)
+═══════════════════════════════════════════════ */
+      .page-wrap {
+        padding: 14px;
+      }
+      .page-title {
+        font-size: 22px;
+        font-weight: 900;
+        margin-bottom: 3px;
+        background: linear-gradient(135deg, var(--blue), var(--purple));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .page-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 18px;
+        font-weight: 600;
+      }
+      .day-card {
+        background: var(--card2);
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        margin-bottom: 14px;
+        overflow: hidden;
+      }
+      .day-card.today-day {
+        border-color: var(--purple);
+      }
+      .day-hdr {
+        background: var(--card);
+        padding: 13px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+        border: none;
+        border-bottom: 2px solid transparent;
+        font-family: inherit;
+      }
+      .day-hdr.open {
+        border-bottom-color: var(--border);
+      }
+      .day-emoji {
+        font-size: 24px;
+      }
+      .day-label {
+        font-size: 16px;
+        font-weight: 900;
+        flex: 1;
+        color: #fff;
+      }
+      .today-badge {
+        margin-left: 8px;
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--purple);
+        background: #1a0e40;
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1px solid var(--purple);
+        vertical-align: middle;
+      }
+      .day-count {
+        font-size: 12px;
+        color: var(--muted);
+        font-weight: 700;
+      }
+      .day-arrow {
+        font-size: 14px;
+        color: var(--muted);
+        margin-left: 6px;
+      }
+      .day-body {
+        padding: 10px 10px 0;
+      }
+
+      /* ═══════════════════════════════════════════════
+   STATS & HISTORY
+═══════════════════════════════════════════════ */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+      .stat-card {
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 8px;
+        text-align: center;
+      }
+      .stat-icon {
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+      .stat-val {
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--gold);
+        line-height: 1;
+      }
+      .stat-lbl {
+        font-size: 10px;
+        color: var(--muted);
+        font-weight: 700;
+        margin-top: 3px;
+      }
+      .hist-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .hist-item {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 14px;
+        padding: 11px 13px;
+      }
+      .hi-status {
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .hi-name {
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .hi-time {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+        font-weight: 600;
+      }
+      .hist-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--muted);
+      }
+      .he-icon {
+        font-size: 52px;
+        margin-bottom: 12px;
+      }
+      .he-text {
+        font-size: 15px;
+        font-weight: 800;
+      }
+      .clear-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px;
+        border-radius: 15px;
+        border: 2px solid #3a1030;
+        background: #1a0820;
+        color: var(--pink);
+        font-size: 14px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .clear-btn:active {
+        background: #2a1030;
+        transform: scale(0.97);
+      }
+
+      /* ═══════════════════════════════════════════════
+   STARS PAGE
+═══════════════════════════════════════════════ */
+      .stars-hero {
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 22px;
+        padding: 26px 20px;
+        text-align: center;
+        margin-bottom: 18px;
+      }
+      .dino-astro {
+        font-size: 68px;
+        display: block;
+        animation: dinoF 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 18px rgba(124, 77, 255, 0.5));
+      }
+      .star-count {
+        font-size: 60px;
+        font-weight: 900;
+        color: var(--gold);
+        line-height: 1;
+        text-shadow: 0 0 24px rgba(255, 215, 0, 0.45);
+        margin: 8px 0 4px;
+      }
+      .star-lbl {
+        font-size: 14px;
+        color: var(--text2);
+        font-weight: 700;
+      }
+      .motiv-msg {
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--yellow);
+        margin-top: 12px;
+        line-height: 1.4;
+      }
+      .constellation {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+        padding: 20px;
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        margin-bottom: 18px;
+        min-height: 90px;
+        align-items: center;
+      }
+      .c-star {
+        font-size: 22px;
+        animation: cTwink 2s ease-in-out infinite;
+        animation-delay: calc(var(--i, 0) * 0.14s);
+      }
+      @keyframes cTwink {
+        0%,
+        100% {
+          transform: scale(1) rotate(0deg);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.3) rotate(18deg);
+          opacity: 1;
+        }
+      }
+      .c-empty {
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+        text-align: center;
+      }
+      .ranks-card {
+        background: var(--card);
+        border: 2px solid var(--border);
+        border-radius: 20px;
+        padding: 16px;
+        margin-bottom: 18px;
+      }
+      .ranks-title {
+        font-size: 13px;
+        font-weight: 900;
+        color: var(--purple);
+        margin-bottom: 12px;
+      }
+      .rank-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .rank-item:last-child {
+        border-bottom: none;
+      }
+      .rank-emoji {
+        font-size: 22px;
+      }
+      .rank-name {
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .rank-req {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .rank-chk {
+        font-size: 16px;
+        color: var(--green);
+        margin-left: auto;
+      }
+
+      /* ═══════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════ */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.82);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-card {
+        background: #0e1640;
+        border: 2px solid var(--purple);
+        border-radius: 22px;
+        padding: 24px 20px;
+        width: 100%;
+        max-width: 360px;
+        text-align: center;
+        box-shadow: 0 0 40px rgba(124, 77, 255, 0.35);
+      }
+      .modal-big {
+        font-size: 36px;
+        margin-bottom: 6px;
+      }
+      .modal-title {
+        font-size: 20px;
+        font-weight: 900;
+        margin-bottom: 6px;
+      }
+      .modal-sub {
+        font-size: 13px;
+        color: var(--text2);
+        font-weight: 600;
+        margin-bottom: 2px;
+        line-height: 1.4;
+      }
+      .pin-dots {
+        display: flex;
+        gap: 14px;
+        justify-content: center;
+        margin: 18px 0 8px;
+      }
+      .pin-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--input);
+        border: 2.5px solid #2a3880;
+        transition: all 0.15s;
+      }
+      .pin-dot.filled {
+        background: var(--gold);
+        border-color: var(--gold);
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      }
+      .pin-error {
+        font-size: 13px;
+        color: var(--pink);
+        font-weight: 800;
+        min-height: 18px;
+        margin-top: 4px;
+      }
+      .pin-ok {
+        font-size: 13px;
+        color: var(--green);
+        font-weight: 800;
+        min-height: 18px;
+        margin-top: 4px;
+      }
+      .keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .key-btn {
+        height: 56px;
+        border-radius: 14px;
+        border: 2px solid var(--border);
+        background: var(--card);
+        color: #fff;
+        font-size: 22px;
+        font-weight: 900;
+        font-family: inherit;
+        cursor: pointer;
+        transition: transform 0.12s;
+      }
+      .key-btn:active {
+        transform: scale(0.9);
+      }
+      .key-btn.del {
+        background: #1a0820;
+        color: var(--pink);
+        font-size: 20px;
+      }
+      .key-btn.empty {
+        background: transparent;
+        border-color: transparent;
+        cursor: default;
+        pointer-events: none;
+      }
+      .modal-btns {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+      .mbtn {
+        flex: 1;
+        padding: 14px;
+        border-radius: 13px;
+        border: none;
+        font-size: 14px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+        transition: transform 0.15s;
+      }
+      .mbtn:active {
+        transform: scale(0.95);
+      }
+      .mbtn.cancel {
+        background: var(--input);
+        color: #fff;
+      }
+      .mbtn.danger {
+        background: #8b1a2a;
+        color: #fff;
+      }
+      .mbtn.ok {
+        background: #1a5030;
+        color: var(--green);
+      }
+      .info-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .ibtn {
+        width: 100%;
+        padding: 15px;
+        border-radius: 13px;
+        border: none;
+        font-size: 14px;
+        font-weight: 800;
+        font-family: inherit;
+        cursor: pointer;
+      }
+
+      /* ═══════════════════════════════════════════════
+   CONFETTI
+═══════════════════════════════════════════════ */
+      #confetti {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 100;
+        overflow: hidden;
+      }
+      .cp {
+        position: absolute;
+        top: -20px;
+        font-size: 20px;
+        animation: cFall var(--d, 2s) ease-in forwards var(--dl, 0s);
+      }
+      @keyframes cFall {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(110vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+      #toast {
+        position: fixed;
+        top: 88px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: #0e3028;
+        border: 2px solid #1a7040;
+        border-radius: 50px;
+        padding: 9px 20px;
+        font-size: 14px;
+        font-weight: 800;
+        color: var(--green);
+        white-space: nowrap;
+        z-index: 30;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* ═══════════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════════ */
+      .app-footer {
+        background: #070c28;
+        border-top: 2px solid var(--border);
+        padding: 14px 16px;
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.7;
+        font-weight: 600;
+      }
+      .app-footer strong {
+        color: var(--text2);
+      }
+      .footer-c {
+        margin-top: 4px;
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="starfield"></div>
+    <div id="confetti"></div>
+    <div id="toast">⭐ +1 estrela conquistada!</div>
+    <div id="modal" style="display: none"></div>
+
+    <div id="app">
+      <header id="header">
+        <div class="h-top">
+          <div>
+            <div class="app-title">🚀 Missão DinoEspacial</div>
+            <div class="app-sub">Missões espaciais de cada dia</div>
+          </div>
+          <div class="h-right">
+            <button id="lock-btn" onclick="guardianPress()">🔒</button>
+            <div class="stars-badge">
+              <span class="sb-icon">⭐</span>
+              <span class="sb-num" id="badge-stars">0</span>
+              <div><div class="sb-lbl">hoje</div></div>
+            </div>
+          </div>
+        </div>
+        <div id="unlock-banner">
+          <span class="ub-text"
+            >🔓 Modo Responsável ativo — edição liberada</span
+          >
+          <button id="lock-now" onclick="doLock()">Bloquear</button>
+        </div>
+      </header>
+
+      <main id="content"></main>
+
+      <nav id="nav">
+        <button
+          class="nav-btn active"
+          data-tab="inicio"
+          onclick="setTab('inicio')"
+        >
+          <span class="nav-icon">🏠</span><span class="nav-lbl">Início</span>
+        </button>
+        <button class="nav-btn" data-tab="semana" onclick="setTab('semana')">
+          <span class="nav-icon">📅</span><span class="nav-lbl">Semana</span>
+        </button>
+        <button
+          class="nav-btn"
+          data-tab="historico"
+          onclick="setTab('historico')"
+        >
+          <span class="nav-icon">📜</span><span class="nav-lbl">Histórico</span>
+        </button>
+        <button
+          class="nav-btn"
+          data-tab="estrelas"
+          onclick="setTab('estrelas')"
+        >
+          <span class="nav-icon">⭐</span><span class="nav-lbl">Estrelas</span>
+        </button>
+      </nav>
+    </div>
+
+    <script>
+      /* ═════════════════════════════════════════
+   CONSTANTS
+═════════════════════════════════════════ */
+      const DAY_KEYS = [
+        "segunda",
+        "terca",
+        "quarta",
+        "quinta",
+        "sexta",
+        "sabado",
+        "domingo",
+      ];
+      const DAY_LABELS = {
+        segunda: "Segunda-feira",
+        terca: "Terça-feira",
+        quarta: "Quarta-feira",
+        quinta: "Quinta-feira",
+        sexta: "Sexta-feira",
+        sabado: "Sábado",
+        domingo: "Domingo",
+      };
+      const DAY_EMOJIS = {
+        segunda: "📚",
+        terca: "🔬",
+        quarta: "🎨",
+        quinta: "🏃",
+        sexta: "🎉",
+        sabado: "🎮",
+        domingo: "🌅",
+      };
+      const DAY_DINOS = {
+        segunda: "🦕",
+        terca: "🦖",
+        quarta: "🚀",
+        quinta: "🛸",
+        sexta: "🌟",
+        sabado: "🎮",
+        domingo: "🌅",
+      };
+      const PERIODS = [
+        {
+          key: "manha",
+          label: "Manhã",
+          icon: "🌞",
+          color: "#ffd740",
+          bar: "linear-gradient(90deg,#ffd740,#ff8a65)",
+        },
+        {
+          key: "tarde",
+          label: "Tarde",
+          icon: "☀️",
+          color: "#ff8a65",
+          bar: "linear-gradient(90deg,#ff8a65,#f06292)",
+        },
+        {
+          key: "noite",
+          label: "Noite",
+          icon: "🌙",
+          color: "#7c4dff",
+          bar: "linear-gradient(90deg,#7c4dff,#40c4ff)",
+        },
+      ];
+      const MOTIVS = [
+        "Excelente trabalho, pequeno astronauta! 🚀",
+        "Mais uma missão completada com sucesso!",
+        "Os Dinoastronautas estão orgulhosos de você! 🦖",
+        "Você está brilhando entre as estrelas! ✨",
+        "Continue assim, explorador espacial! 🌟",
+        "Incrível! Suas estrelas iluminam a galáxia! 💫",
+        "Missão cumprida com honra, astronauta! 🎖️",
+      ];
+      const RANKS = [
+        { stars: 5, label: "Cadete Espacial", icon: "🔭" },
+        { stars: 15, label: "Piloto Espacial", icon: "🛸" },
+        { stars: 30, label: "Astronauta Dino", icon: "🦖" },
+        { stars: 50, label: "Explorador Galáctico", icon: "🌌" },
+        { stars: 100, label: "Lenda do Universo", icon: "🌟" },
+      ];
+      const CONFETTI_E = [
+        "⭐",
+        "🌟",
+        "✨",
+        "💫",
+        "🚀",
+        "🦖",
+        "🪐",
+        "🌈",
+        "🎉",
+        "⚡",
+      ];
+      const SK = "missao_dino_v3";
+      const PK = "missao_dino_pin_v1";
+
+      /* ═════════════════════════════════════════
+   STATE
+═════════════════════════════════════════ */
+      let S,
+        unlocked = false,
+        activeTab = "inicio",
+        _toastT,
+        expandedDay = null;
+      let _pm = "",
+        _pstep = "enter",
+        _p = "",
+        _p2 = "";
+
+      function todayKey() {
+        const d = new Date().getDay();
+        return DAY_KEYS[d === 0 ? 6 : d - 1];
+      }
+
+      function defDay(pfx) {
+        return {
+          manha: [
+            { id: pfx + "-m1", name: "Acordar e esticar", completed: false },
+            { id: pfx + "-m2", name: "Escovar os dentes", completed: false },
+            { id: pfx + "-m3", name: "Tomar banho", completed: false },
+          ],
+          tarde: [
+            { id: pfx + "-t1", name: "Almoçar", completed: false },
+            { id: pfx + "-t2", name: "Momento de lazer", completed: false },
+          ],
+          noite: [
+            { id: pfx + "-n1", name: "Jantar", completed: false },
+            { id: pfx + "-n2", name: "Escovar os dentes", completed: false },
+            { id: pfx + "-n3", name: "Dormir bem", completed: false },
+          ],
+        };
+      }
+
+      function defState() {
+        const t = {};
+        DAY_KEYS.forEach((k) => (t[k] = defDay(k)));
+        t.sabado.manha = [
+          { id: "sab-m1", name: "Acordar com calma", completed: false },
+          { id: "sab-m2", name: "Tomar café especial", completed: false },
+        ];
+        t.sabado.tarde = [
+          { id: "sab-t1", name: "Brincar e relaxar", completed: false },
+          { id: "sab-t2", name: "Almoçar com a família", completed: false },
+        ];
+        t.domingo.manha = [
+          { id: "dom-m1", name: "Dia de descanso", completed: false },
+          { id: "dom-m2", name: "Café da manhã tranquilo", completed: false },
+        ];
+        t.domingo.tarde = [
+          { id: "dom-t1", name: "Passeio ou brincadeira", completed: false },
+        ];
+        return {
+          tasks: t,
+          history: [],
+          totalStars: 0,
+          todayDate: new Date().toLocaleDateString("pt-BR"),
+          todayStars: 0,
+          weekStars: 0,
+        };
+      }
+
+      function loadS() {
+        try {
+          const r = localStorage.getItem(SK);
+          if (!r) {
+            S = defState();
+            return;
+          }
+          S = JSON.parse(r);
+          if (!S.tasks) S.tasks = {};
+          DAY_KEYS.forEach((k) => {
+            if (!S.tasks[k]) S.tasks[k] = defDay(k);
+            ["manha", "tarde", "noite"].forEach((p) => {
+              if (!S.tasks[k][p]) S.tasks[k][p] = [];
+            });
+          });
+          if (!S.history) S.history = [];
+          if (!S.totalStars) S.totalStars = 0;
+          if (!S.todayStars) S.todayStars = 0;
+          if (!S.weekStars) S.weekStars = 0;
+        } catch {
+          S = defState();
+        }
+      }
+
+      function save() {
+        localStorage.setItem(SK, JSON.stringify(S));
+      }
+
+      function rollover() {
+        const today = new Date().toLocaleDateString("pt-BR");
+        if (S.todayDate === today) return;
+        const key = todayKey();
+        const pL = { manha: "Manhã", tarde: "Tarde", noite: "Noite" };
+        const unc = [];
+        ["manha", "tarde", "noite"].forEach((p) => {
+          (S.tasks[key]?.[p] ?? []).forEach((t) => {
+            if (!t.completed)
+              unc.push({
+                id: Date.now() + "-" + t.id,
+                taskName: t.name,
+                date: S.todayDate,
+                time: "23:59",
+                dayName: DAY_LABELS[key],
+                status: "nao_cumprida",
+                period: pL[p],
+              });
+          });
+        });
+        ["manha", "tarde", "noite"].forEach((p) => {
+          if (S.tasks[key]?.[p])
+            S.tasks[key][p] = S.tasks[key][p].map((t) => ({
+              ...t,
+              completed: false,
+              completedAt: undefined,
+            }));
+        });
+        S.history = [...unc, ...S.history];
+        S.todayDate = today;
+        S.todayStars = 0;
+        save();
+      }
+
+      /* ═════════════════════════════════════════
+   STARFIELD
+═════════════════════════════════════════ */
+      function buildStars() {
+        const sf = document.getElementById("starfield");
+        let h = "";
+        for (let i = 0; i < 80; i++) {
+          const s = (Math.random() * 2.5 + 0.5).toFixed(1);
+          const d = (Math.random() * 3 + 2).toFixed(1),
+            dl = (Math.random() * 4).toFixed(1);
+          h += `<div class="star" style="left:${(Math.random() * 100).toFixed(1)}%;top:${(Math.random() * 100).toFixed(1)}%;width:${s}px;height:${s}px;--d:${d}s;--dl:${dl}s"></div>`;
+        }
+        [
+          { e: "🪐", s: 36, l: 8, t: 12, d: 7, dl: 0 },
+          { e: "🌍", s: 28, l: 78, t: 8, d: 9, dl: 2 },
+          { e: "🌙", s: 22, l: 88, t: 55, d: 6, dl: 1 },
+          { e: "⭐", s: 20, l: 5, t: 70, d: 8, dl: 3 },
+          { e: "🌟", s: 18, l: 50, t: 5, d: 10, dl: 1.5 },
+        ].forEach((p) => {
+          h += `<div class="planet" style="left:${p.l}%;top:${p.t}%;font-size:${p.s}px;--d:${p.d}s;--dl:${p.dl}s">${p.e}</div>`;
+        });
+        sf.innerHTML = h;
+      }
+
+      /* ═════════════════════════════════════════
+   CONFETTI & TOAST
+═════════════════════════════════════════ */
+      function confetti() {
+        const c = document.getElementById("confetti");
+        c.innerHTML = Array.from({ length: 12 }, () => {
+          const e = CONFETTI_E[Math.floor(Math.random() * CONFETTI_E.length)];
+          return `<div class="cp" style="left:${(Math.random() * 90 + 5).toFixed(1)}%;--d:${(Math.random() * 1.2 + 1.2).toFixed(1)}s;--dl:${(Math.random() * 0.5).toFixed(2)}s">${e}</div>`;
+        }).join("");
+        setTimeout(() => (c.innerHTML = ""), 3000);
+      }
+
+      function toast() {
+        const t = document.getElementById("toast");
+        t.classList.add("show");
+        clearTimeout(_toastT);
+        _toastT = setTimeout(() => t.classList.remove("show"), 2200);
+      }
+
+      /* ═════════════════════════════════════════
+   HELPERS
+═════════════════════════════════════════ */
+      function uid() {
+        return "task-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+      }
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      /* ═════════════════════════════════════════
+   RENDER: PERIODS
+═════════════════════════════════════════ */
+      function renderPeriods(dayKey, compact = false) {
+        return PERIODS.map((p) => {
+          const list = S.tasks[dayKey]?.[p.key] ?? [];
+          const done = list.filter((t) => t.completed).length,
+            total = list.length;
+          const pct = total > 0 ? ((done / total) * 100).toFixed(0) : 0;
+          return `<div class="period-section" style="${compact ? "margin-top:10px" : ""}">
+      <div class="period-header">
+        <span class="p-icon">${p.icon}</span>
+        <span class="p-title" style="color:${p.color}">${p.label}</span>
+        <span class="p-prog" id="prog-${dayKey}-${p.key}">${done}/${total}</span>
+      </div>
+      <div class="period-bar"><div class="period-bar-fill" id="bar-${dayKey}-${p.key}" style="width:${pct}%;background:${p.bar}"></div></div>
+      <div class="tasks-list" id="tlist-${dayKey}-${p.key}">
+        ${list.map((t) => renderTask(dayKey, p, t)).join("")}
+      </div>
+      ${unlocked ? `<button class="add-btn" onclick="addTask('${dayKey}','${p.key}')"><span style="font-size:18px;font-weight:900">+</span> Nova Missão</button>` : ""}
+      ${!compact ? '<div class="section-div"></div>' : ""}
+    </div>`;
+        }).join("");
+      }
+
+      function renderTask(dayKey, period, task) {
+        const locked = !unlocked;
+        return `<div class="task-card${task.completed ? " done" : ""}" id="tc-${task.id}">
+    <button class="task-chk${task.completed ? " checked" : ""}" style="border-color:${period.color}"
+      onclick="toggleTask('${dayKey}','${period.key}','${task.id}')">${task.completed ? "✓" : ""}</button>
+    <input class="task-input${task.completed ? " done" : ""}" value="${esc(task.name)}"
+      placeholder="${locked ? "Tarefa" : "Escreva a tarefa..."}"
+      ${locked ? 'readonly style="cursor:default;pointer-events:none"' : ""}
+      onchange="updateName('${dayKey}','${period.key}','${task.id}',this.value)"
+      oninput="updateName('${dayKey}','${period.key}','${task.id}',this.value)"
+      maxlength="60">
+    ${!locked ? `<button class="task-del" onclick="delTask('${dayKey}','${period.key}','${task.id}')">✕</button>` : ""}
+  </div>`;
+      }
+
+      /* ═════════════════════════════════════════
+   RENDER: PAGES
+═════════════════════════════════════════ */
+      function pageInicio() {
+        const key = todayKey();
+        const all = Object.values(S.tasks[key]).flat();
+        const done = all.filter((t) => t.completed).length;
+        return `
+    <div style="padding:14px 14px 0">
+      <div class="today-hero">
+        <div class="th-emoji">${DAY_DINOS[key]}</div>
+        <div>
+          <div class="th-lbl">🚀 MISSÕES DE HOJE</div>
+          <div class="th-day">Hoje é ${DAY_LABELS[key]}</div>
+          <div class="th-sub" id="hero-sub">${done}/${all.length} missões concluídas ${DAY_EMOJIS[key]}</div>
+        </div>
+      </div>
+    </div>
+    ${renderPeriods(key)}
+    <div style="height:8px"></div>
+    ${footer()}`;
+      }
+
+      function pageSemana() {
+        const today = todayKey();
+        if (!expandedDay || activeTab !== "semana") expandedDay = today;
+        return `<div class="page-wrap">
+    <div class="page-title">📅 Semana</div>
+    <div class="page-sub">Organização completa da semana</div>
+    ${DAY_KEYS.map((day) => {
+      const all = Object.values(S.tasks[day]).flat();
+      const done = all.filter((t) => t.completed).length;
+      const isOpen = expandedDay === day,
+        isToday = day === today;
+      return `<div class="day-card${isToday ? " today-day" : ""}" id="dc-${day}">
+        <button class="day-hdr${isOpen ? " open" : ""}" onclick="toggleDay('${day}')">
+          <span class="day-emoji">${DAY_EMOJIS[day]}</span>
+          <span class="day-label">${DAY_LABELS[day]}${isToday ? '<span class="today-badge">HOJE</span>' : ""}</span>
+          <span class="day-count">${done}/${all.length}</span>
+          <span class="day-arrow">${isOpen ? "▲" : "▼"}</span>
+        </button>
+        ${isOpen ? `<div class="day-body">${renderPeriods(day, true)}<div style="height:10px"></div></div>` : ""}
+      </div>`;
+    }).join("")}
+  </div>${footer()}`;
+      }
+
+      function pageHistorico() {
+        const h = S.history;
+        return `<div class="page-wrap">
+    <div class="page-title">📜 Histórico</div>
+    <div class="page-sub">Registro de todas as missões</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-val">${S.todayStars}</div><div class="stat-lbl">Hoje</div></div>
+      <div class="stat-card"><div class="stat-icon">🌟</div><div class="stat-val">${S.weekStars}</div><div class="stat-lbl">Semana</div></div>
+      <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val">${S.totalStars}</div><div class="stat-lbl">Total</div></div>
+    </div>
+    ${
+      !h.length
+        ? `<div class="hist-empty"><div class="he-icon">🚀</div><div class="he-text">Nenhuma missão registrada ainda!</div>
+         <div style="margin-top:8px;font-size:13px;color:var(--muted);font-weight:600">Complete tarefas na aba Início para ver o histórico aqui.</div></div>`
+        : `<div class="hist-list">${h
+            .map(
+              (e) => `
+          <div class="hist-item">
+            <div class="hi-status">${e.status === "cumprida" ? "✅" : "❌"}</div>
+            <div style="min-width:0;flex:1">
+              <div class="hi-name">${esc(e.taskName)}</div>
+              <div class="hi-time">${esc(e.dayName)} · ${esc(e.date)} às ${esc(e.time)} · ${esc(e.period)}</div>
+            </div>
+          </div>`,
+            )
+            .join("")}</div>
+        <button class="clear-btn" onclick="confirmClear()">🗑️ Limpar Histórico</button>`
+    }
+  </div>${footer()}`;
+      }
+
+      function pageEstrelas() {
+        const total = S.totalStars;
+        const motiv =
+          total === 0
+            ? "Complete suas primeiras missões para ganhar estrelas! 🚀"
+            : MOTIVS[total % MOTIVS.length];
+        const stars = Array.from({ length: Math.min(total, 60) }, (_, i) =>
+          i % 7 === 0 ? "🌟" : i % 5 === 0 ? "💫" : "⭐",
+        );
+        return `<div class="page-wrap">
+    <div class="page-title">⭐ Estrelas</div>
+    <div class="page-sub">Suas conquistas espaciais</div>
+    <div class="stars-hero">
+      <span class="dino-astro">🦕</span>
+      <div class="star-count">${total}</div>
+      <div class="star-lbl">estrelas conquistadas</div>
+      <div class="motiv-msg">${esc(motiv)}</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">🌅</div><div class="stat-val" style="color:#ffd740">${S.todayStars}</div><div class="stat-lbl">Missões hoje</div></div>
+      <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" style="color:#40c4ff">${S.weekStars}</div><div class="stat-lbl">Esta semana</div></div>
+      <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val" style="color:#69f0ae">${total}</div><div class="stat-lbl">Total geral</div></div>
+    </div>
+    <div style="font-size:13px;font-weight:800;color:var(--muted);margin-bottom:10px">🌌 Sua constelação</div>
+    <div class="constellation">
+      ${
+        !stars.length
+          ? '<div class="c-empty">🌌 Complete missões para adicionar estrelas à sua constelação!</div>'
+          : stars
+              .map(
+                (e, i) => `<span class="c-star" style="--i:${i}">${e}</span>`,
+              )
+              .join("")
+      }
+      ${total > 60 ? `<div style="width:100%;text-align:center;font-size:12px;color:var(--muted)">+${total - 60} estrelas mais!</div>` : ""}
+    </div>
+    <div class="ranks-card">
+      <div class="ranks-title">🚀 Sistema de Conquistas</div>
+      ${RANKS.map(
+        (
+          r,
+        ) => `<div class="rank-item" style="opacity:${total >= r.stars ? 1 : 0.42}">
+        <span class="rank-emoji">${r.icon}</span>
+        <div><div class="rank-name">${r.label}</div><div class="rank-req">${r.stars} estrelas necessárias</div></div>
+        ${total >= r.stars ? '<span class="rank-chk">✓</span>' : ""}
+      </div>`,
+      ).join("")}
+    </div>
+  </div>${footer()}`;
+      }
+
+      function footer() {
+        return `<footer class="app-footer">
+    <div>Desenvolvido por <strong>Mayron Simões</strong></div>
+    <div>Psicólogo CRP 16/7824</div>
+    <div class="footer-c">
+      <span>📞 (27) 98132-3519</span>
+      <span>📷 @mayronsimoes_psi</span>
+      <span>✉️ psimayronsimoes@gmail.com</span>
+    </div>
+  </footer>`;
+      }
+
+      /* ═════════════════════════════════════════
+   RENDER DISPATCH
+═════════════════════════════════════════ */
+      function render() {
+        syncHeader();
+        const el = document.getElementById("content");
+        if (activeTab === "inicio") el.innerHTML = pageInicio();
+        else if (activeTab === "semana") el.innerHTML = pageSemana();
+        else if (activeTab === "historico") el.innerHTML = pageHistorico();
+        else el.innerHTML = pageEstrelas();
+        el.scrollTop = 0;
+      }
+
+      function syncHeader() {
+        document.getElementById("badge-stars").textContent = S.todayStars;
+        const lb = document.getElementById("lock-btn");
+        lb.textContent = unlocked ? "🔓" : "🔒";
+        lb.className = unlocked ? "open" : "";
+        document.getElementById("unlock-banner").className = unlocked
+          ? "show"
+          : "";
+      }
+
+      /* ═════════════════════════════════════════
+   NAVIGATION
+═════════════════════════════════════════ */
+      function setTab(tab) {
+        if (tab !== "semana") expandedDay = null;
+        activeTab = tab;
+        document
+          .querySelectorAll(".nav-btn")
+          .forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+        render();
+      }
+
+      function toggleDay(day) {
+        expandedDay = expandedDay === day ? null : day;
+        render();
+      }
+
+      /* ═════════════════════════════════════════
+   TASK ACTIONS
+═════════════════════════════════════════ */
+      function toggleTask(dayKey, periodKey, taskId) {
+        const now = new Date();
+        const time = now.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const date = now.toLocaleDateString("pt-BR");
+        const pL = { manha: "Manhã", tarde: "Tarde", noite: "Noite" };
+        const task = S.tasks[dayKey][periodKey].find((t) => t.id === taskId);
+        if (!task) return;
+        const was = task.completed;
+        task.completed = !was;
+        task.completedAt = !was ? now.toISOString() : undefined;
+        if (!was) {
+          S.history = [
+            {
+              id: Date.now() + "-" + taskId,
+              taskName: task.name,
+              date,
+              time,
+              dayName: DAY_LABELS[dayKey],
+              status: "cumprida",
+              period: pL[periodKey],
+            },
+            ...S.history,
+          ];
+          S.todayStars++;
+          S.weekStars++;
+          S.totalStars++;
+          confetti();
+          toast();
+        } else {
+          S.history = S.history.filter(
+            (h) =>
+              !(
+                h.taskName === task.name &&
+                h.date === date &&
+                h.status === "cumprida"
+              ),
+          );
+          S.todayStars = Math.max(0, S.todayStars - 1);
+          S.weekStars = Math.max(0, S.weekStars - 1);
+          S.totalStars = Math.max(0, S.totalStars - 1);
+        }
+        save();
+        // Patch task card
+        const card = document.getElementById("tc-" + taskId);
+        const period = PERIODS.find((p) => p.key === periodKey);
+        if (card) card.outerHTML = renderTask(dayKey, period, task);
+        // Update bar + progress
+        const list = S.tasks[dayKey][periodKey];
+        const doneC = list.filter((t) => t.completed).length,
+          totalC = list.length;
+        const pct = totalC > 0 ? ((doneC / totalC) * 100).toFixed(0) : 0;
+        const bar = document.getElementById("bar-" + dayKey + "-" + periodKey);
+        if (bar) bar.style.width = pct + "%";
+        const pg = document.getElementById("prog-" + dayKey + "-" + periodKey);
+        if (pg) pg.textContent = `${doneC}/${totalC}`;
+        // Update hero sub (Início tab)
+        if (activeTab === "inicio") {
+          const allT = Object.values(S.tasks[dayKey]).flat();
+          const dA = allT.filter((t) => t.completed).length;
+          const hs = document.getElementById("hero-sub");
+          if (hs)
+            hs.textContent = `${dA}/${allT.length} missões concluídas ${DAY_EMOJIS[dayKey]}`;
+        }
+        syncHeader();
+      }
+
+      function addTask(dayKey, periodKey) {
+        const id = uid();
+        S.tasks[dayKey][periodKey].push({ id, name: "", completed: false });
+        save();
+        const tl = document.getElementById("tlist-" + dayKey + "-" + periodKey);
+        if (tl) {
+          const period = PERIODS.find((p) => p.key === periodKey);
+          const div = document.createElement("div");
+          div.innerHTML = renderTask(dayKey, period, {
+            id,
+            name: "",
+            completed: false,
+          });
+          tl.appendChild(div.firstElementChild);
+          setTimeout(() => {
+            const inp = document.querySelector("#tc-" + id + " .task-input");
+            if (inp) inp.focus();
+          }, 40);
+          const list = S.tasks[dayKey][periodKey];
+          const pg = document.getElementById(
+            "prog-" + dayKey + "-" + periodKey,
+          );
+          if (pg)
+            pg.textContent = `${list.filter((t) => t.completed).length}/${list.length}`;
+        }
+      }
+
+      function updateName(dayKey, periodKey, taskId, val) {
+        const task = S.tasks[dayKey][periodKey].find((t) => t.id === taskId);
+        if (task) {
+          task.name = val;
+          save();
+        }
+      }
+
+      function delTask(dayKey, periodKey, taskId) {
+        S.tasks[dayKey][periodKey] = S.tasks[dayKey][periodKey].filter(
+          (t) => t.id !== taskId,
+        );
+        save();
+        const card = document.getElementById("tc-" + taskId);
+        if (card) card.remove();
+        const list = S.tasks[dayKey][periodKey];
+        const done = list.filter((t) => t.completed).length;
+        const bar = document.getElementById("bar-" + dayKey + "-" + periodKey);
+        if (bar)
+          bar.style.width =
+            list.length > 0
+              ? ((done / list.length) * 100).toFixed(0) + "%"
+              : "0%";
+        const pg = document.getElementById("prog-" + dayKey + "-" + periodKey);
+        if (pg) pg.textContent = `${done}/${list.length}`;
+      }
+
+      function confirmClear() {
+        modal(`<div class="modal-big">⚠️</div>
+    <div class="modal-title">Apagar tudo?</div>
+    <div class="modal-sub">Isso vai apagar todo o histórico e zerar as estrelas. Tem certeza?</div>
+    <div class="modal-btns" style="margin-top:22px">
+      <button class="mbtn cancel" onclick="closeModal()">Cancelar</button>
+      <button class="mbtn danger" onclick="doClear()">Apagar</button>
+    </div>`);
+      }
+      function doClear() {
+        S.history = [];
+        S.totalStars = 0;
+        S.todayStars = 0;
+        S.weekStars = 0;
+        save();
+        closeModal();
+        render();
+      }
+
+      /* ═════════════════════════════════════════
+   GUARDIAN MODE
+═════════════════════════════════════════ */
+      function hasPin() {
+        return !!localStorage.getItem(PK);
+      }
+      function getPin() {
+        return localStorage.getItem(PK) ?? "";
+      }
+
+      function guardianPress() {
+        if (unlocked) {
+          openPin("unlock");
+        } else if (!hasPin()) {
+          openPin("setup");
+        } else {
+          infoModal();
+        }
+      }
+      function doLock() {
+        unlocked = false;
+        syncHeader();
+      }
+
+      function infoModal() {
+        modal(`<div class="modal-big">🦕</div>
+    <div class="modal-title">🔒 Modo Criança</div>
+    <div class="modal-sub">O aplicativo está no Modo Criança. Peça a um responsável para desbloquear a edição.</div>
+    <div class="info-btns">
+      <button class="ibtn" style="background:#1a2660;color:#fff" onclick="closeModal();openPin('unlock')">🔑 Sou Responsável — Desbloquear</button>
+      <button class="ibtn" style="background:#111b4a;color:var(--muted)" onclick="closeModal()">Fechar</button>
+    </div>`);
+      }
+
+      /* ── PIN MODAL ──────────────────────────── */
+      function openPin(mode) {
+        _pm = mode;
+        _pstep = "enter";
+        _p = "";
+        _p2 = "";
+        drawPin();
+      }
+
+      function drawPin(err = "", ok = "") {
+        const titles = {
+          unlock: {
+            icon: "🔑",
+            title: "Modo Responsável",
+            sub: "Digite a senha para liberar a edição de tarefas.",
+          },
+          setup: {
+            icon: "🔐",
+            title: "Criar Senha",
+            sub:
+              _pstep === "enter"
+                ? "Crie uma senha de 4 dígitos para proteger a edição."
+                : "Confirme a senha digitada.",
+          },
+          change: {
+            icon: "🔄",
+            title: "Alterar Senha",
+            sub:
+              _pstep === "enter"
+                ? "Digite a senha atual (4 dígitos)."
+                : "Digite a nova senha (4 dígitos).",
+          },
+        };
+        const { icon, title, sub } = titles[_pm];
+        const cur =
+          (_pm === "setup" && _pstep === "confirm") ||
+          (_pm === "change" && _pstep === "confirm")
+            ? _p2
+            : _p;
+        const dots = Array.from(
+          { length: 4 },
+          (_, i) =>
+            `<div class="pin-dot${i < cur.length ? " filled" : ""}"></div>`,
+        ).join("");
+        const keys = [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9",
+          "",
+          "0",
+          "⌫",
+        ];
+        const extraBtn =
+          unlocked && _pm !== "change"
+            ? `<button class="mbtn cancel" onclick="closeModal();openPin('change')">Alterar Senha</button>`
+            : "";
+        const lockBtn = unlocked
+          ? `<button class="mbtn ok" onclick="closeModal();doLock()">🔒 Bloquear</button>`
+          : "";
+        modal(`<div class="modal-big">${icon}</div>
+    <div class="modal-title">${title}</div>
+    <div class="modal-sub">${sub}</div>
+    <div class="pin-dots">${dots}</div>
+    <div class="${err ? "pin-error" : "pin-ok"}">${err || ok}</div>
+    <div class="keypad">${keys
+      .map(
+        (
+          k,
+        ) => `<button class="key-btn${k === "" ? " empty" : k === "⌫" ? " del" : ""}"
+      onclick="${k === "" ? "void(0)" : k === "⌫" ? "pinDel()" : "pinPress('" + k + "')"}">${k}</button>`,
+      )
+      .join("")}</div>
+    <div class="modal-btns">${extraBtn}<button class="mbtn cancel" onclick="closeModal()">Cancelar</button>${lockBtn}</div>`);
+      }
+
+      function pinPress(d) {
+        const isc =
+          (_pm === "setup" && _pstep === "confirm") ||
+          (_pm === "change" && _pstep === "confirm");
+        if (isc) {
+          if (_p2.length < 4) _p2 += d;
+        } else {
+          if (_p.length < 4) _p += d;
+        }
+        drawPin();
+        checkPin();
+      }
+
+      function pinDel() {
+        const isc =
+          (_pm === "setup" && _pstep === "confirm") ||
+          (_pm === "change" && _pstep === "confirm");
+        if (isc) _p2 = _p2.slice(0, -1);
+        else _p = _p.slice(0, -1);
+        drawPin();
+      }
+
+      function checkPin() {
+        if (_pm === "unlock" && _p.length === 4) {
+          if (_p === getPin()) {
+            unlocked = true;
+            closeModal();
+            syncHeader();
+          } else {
+            setTimeout(() => {
+              _p = "";
+              drawPin("Senha incorreta! Tente novamente.");
+            }, 160);
+          }
+          return;
+        }
+        if (_pm === "setup") {
+          if (_pstep === "enter" && _p.length === 4) {
+            setTimeout(() => {
+              _pstep = "confirm";
+              drawPin();
+            }, 200);
+            return;
+          }
+          if (_pstep === "confirm" && _p2.length === 4) {
+            if (_p2 === _p) {
+              localStorage.setItem(PK, _p);
+              drawPin("", "Senha criada! ✅");
+              setTimeout(closeModal, 1000);
+            } else {
+              _p = "";
+              _p2 = "";
+              _pstep = "enter";
+              setTimeout(
+                () => drawPin("As senhas não coincidem. Tente de novo."),
+                160,
+              );
+            }
+            return;
+          }
+        }
+        if (_pm === "change") {
+          if (_pstep === "enter" && _p.length === 4) {
+            setTimeout(() => {
+              _pstep = "confirm";
+              drawPin();
+            }, 200);
+            return;
+          }
+          if (_pstep === "confirm" && _p2.length === 4) {
+            if (_p === getPin()) {
+              localStorage.setItem(PK, _p2);
+              drawPin("", "Senha alterada! ✅");
+              setTimeout(closeModal, 1000);
+            } else {
+              _p = "";
+              _p2 = "";
+              _pstep = "enter";
+              setTimeout(() => drawPin("Senha atual incorreta."), 160);
+            }
+            return;
+          }
+        }
+      }
+
+      /* ═════════════════════════════════════════
+   MODAL ENGINE
+═════════════════════════════════════════ */
+      function modal(html) {
+        const m = document.getElementById("modal");
+        m.className = "modal-overlay";
+        m.style.display = "flex";
+        m.innerHTML = `<div class="modal-card" onclick="event.stopPropagation()">${html}</div>`;
+        m.onclick = closeModal;
+      }
+      function closeModal() {
+        const m = document.getElementById("modal");
+        m.style.display = "none";
+        m.innerHTML = "";
+      }
+
+      /* ═════════════════════════════════════════
+   BOOT
+═════════════════════════════════════════ */
+      loadS();
+      rollover();
+      buildStars();
+      render();
+    </script>
+  </body>
+</html>
